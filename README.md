@@ -42,6 +42,10 @@ php artisan invoiceflow:create-admin tu@correo.com
 
 Seguí las indicaciones interactivas (nombre/contraseña si es usuario nuevo; promoción a admin si el email ya existe).
 
+## Despliegue en Fly.io
+
+Guía paso a paso: [DEPLOY_FLY.md](DEPLOY_FLY.md) (Dockerfile generado con `fly-apps/dockerfile-laravel`, `fly.toml`, Postgres recomendado).
+
 ## Producción (resumen)
 
 - `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` con HTTPS.

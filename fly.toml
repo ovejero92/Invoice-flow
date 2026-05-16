@@ -1,0 +1,49 @@
+# fly.toml — InvoiceFlow en Fly.io
+# Cambiá `app` por el nombre que elijas, o ejecutá `fly launch` y dejá que Fly lo cree.
+
+app = 'projinvoiceflow'
+primary_region = 'mad'
+
+[build]
+  [build.args]
+    PHP_VERSION = '8.3'
+    NODE_VERSION = '20'
+
+[deploy]
+  release_command = 'php /var/www/html/artisan migrate --force'
+
+[env]
+  APP_ENV = 'production'
+  APP_DEBUG = 'false'
+  LOG_CHANNEL = 'stderr'
+  LOG_LEVEL = 'info'
+  # Usá PostgreSQL en Fly (recomendado tras `fly postgres attach`)
+  DB_CONNECTION = 'pgsql'
+  SESSION_DRIVER = 'cookie'
+  CACHE_STORE = 'file'
+  QUEUE_CONNECTION = 'sync'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = 'requests'
+    hard_limit = 250
+    soft_limit = 200
+
+[[http_service.checks]]
+  grace_period = '15s'
+  interval = '30s'
+  method = 'get'
+  timeout = '5s'
+  path = '/up'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
