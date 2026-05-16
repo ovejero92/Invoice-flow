@@ -1,0 +1,35 @@
+*.log
+.DS_Store
+
+# Notas privadas (estrategia, hosting); no subir a GitHub
+PRIVATE_NOTES.md
+
+# Base SQLite local (puede contener datos reales de prueba)
+/database/database.sqlite
+/database/*.sqlite-journal
+
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/composer.phar
+/node_modules
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
