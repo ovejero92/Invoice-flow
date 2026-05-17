@@ -10,5 +10,6 @@
     <a href="{{ route('admin.proyectos.index') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('admin.proyectos.*') }}">Proyectos</a>
     <a href="{{ route('admin.facturas.index') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('admin.facturas.*') }}">Facturación</a>
     <a href="{{ route('admin.pagos.index') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('admin.pagos.*') }}">Pagos</a>
+    <a href="{{ route('admin.organizations.index') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('admin.organizations.*') }}">Estudios / planes</a>
     <a href="{{ route('admin.usuarios-cliente.create') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('admin.usuarios-cliente.*') }}">Alta portal cliente</a>
 </nav>

@@ -1,16 +1,22 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\Client;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FacturaPdfController;
 use App\Http\Controllers\Freelancer;
+use App\Http\Controllers\LegalController;
+use App\Http\Controllers\OrganizationSettingsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/legal/privacidad', [LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/legal/terminos', [LegalController::class, 'terms'])->name('legal.terms');
 
 Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
@@ -30,6 +36,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('facturacion', [Admin\FacturaController::class, 'index'])->name('facturas.index');
     Route::get('facturacion/{factura}', [Admin\FacturaController::class, 'show'])->name('facturas.show');
     Route::get('pagos', Admin\PagoController::class)->name('pagos.index');
+    Route::get('estudios', [Admin\OrganizationController::class, 'index'])->name('organizations.index');
+    Route::post('estudios/{organization}/upgrade', [Admin\OrganizationController::class, 'upgrade'])->name('organizations.upgrade');
+    Route::post('estudios/{organization}/downgrade', [Admin\OrganizationController::class, 'downgrade'])->name('organizations.downgrade');
+    Route::get('facturacion-exportar/csv', Admin\FacturaExportController::class)->name('facturas.export');
 });
 
 Route::middleware(['auth', 'verified', 'role:freelancer'])->prefix('freelancer')->name('freelancer.')->group(function () {
@@ -38,6 +48,8 @@ Route::middleware(['auth', 'verified', 'role:freelancer'])->prefix('freelancer')
     Route::get('proyectos/{proyecto}', [Freelancer\ProyectoController::class, 'show'])->name('proyectos.show');
     Route::post('registro-horas', [Freelancer\RegistroHoraController::class, 'store'])->name('registro-horas.store');
     Route::get('reporte-horas', Freelancer\ReporteHorasController::class)->name('reporte-horas');
+    Route::get('estudio/datos-fiscales', [OrganizationSettingsController::class, 'edit'])->name('organization.settings');
+    Route::patch('estudio/datos-fiscales', [OrganizationSettingsController::class, 'update'])->name('organization.settings.update');
 });
 
 Route::middleware(['auth', 'verified', 'role:client'])->prefix('cliente')->name('client.')->group(function () {
@@ -51,6 +63,7 @@ Route::middleware(['auth', 'verified', 'role:client'])->prefix('cliente')->name(
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('plan', [BillingController::class, 'index'])->name('billing.index');
     Route::get('documentos/facturas/{factura}/pdf', FacturaPdfController::class)->name('facturas.pdf');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

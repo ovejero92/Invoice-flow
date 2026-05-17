@@ -28,6 +28,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'pidgeon' => [
+        'url' => env('PIDGEON_URL', 'http://127.0.0.1:3000'),
+        'domain' => env('PIDGEON_DOMAIN', 'invoiceflow.local'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

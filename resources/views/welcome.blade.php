@@ -85,23 +85,59 @@
             </div>
         </section>
 
+        <section class="border-y border-slate-200 bg-white py-16">
+            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <h2 class="text-center text-2xl font-bold text-slate-900">Planes</h2>
+                <p class="mt-3 text-center text-sm text-slate-600 max-w-2xl mx-auto">
+                    Empezá gratis. El plan Pro se activa manualmente por ahora (sin pasarela de pago todavía).
+                </p>
+                @php
+                    $free = config('plans.limits.free');
+                    $pro = config('plans.limits.pro');
+                    $pricing = config('plans.pricing');
+                @endphp
+                <div class="mt-10 grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+                    <div class="rounded-2xl border border-slate-200 p-6">
+                        <h3 class="text-lg font-semibold">{{ $pricing['free']['label'] }}</h3>
+                        <p class="mt-2 text-3xl font-bold">0 €</p>
+                        <ul class="mt-6 space-y-2 text-sm text-slate-600">
+                            <li>Hasta {{ $free['max_clients'] }} clientes</li>
+                            <li>Hasta {{ $free['max_projects'] }} proyectos</li>
+                            <li>{{ $free['max_invoices_per_month'] }} facturas / mes</li>
+                            <li>{{ $free['max_client_portal_users'] }} usuarios portal cliente</li>
+                            <li>PDF de facturas</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border-2 border-indigo-200 bg-indigo-50/40 p-6">
+                        <h3 class="text-lg font-semibold text-indigo-900">{{ $pricing['pro']['label'] }}</h3>
+                        <p class="mt-2 text-3xl font-bold text-indigo-900">~{{ $pricing['pro']['price_eur'] }} €/mes</p>
+                        <ul class="mt-6 space-y-2 text-sm text-indigo-900/90">
+                            <li>Hasta {{ $pro['max_clients'] }} clientes</li>
+                            <li>Hasta {{ $pro['max_projects'] }} proyectos</li>
+                            <li>{{ $pro['max_invoices_per_month'] }} facturas / mes</li>
+                            <li>Export CSV contable</li>
+                            <li>Datos fiscales completos en PDF</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
             <div class="grid gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">Qué podés hacer al entrar (hoy)</h2>
+                    <h2 class="text-xl font-bold text-slate-900">Qué incluye hoy</h2>
                     <ul class="mt-4 space-y-3 text-slate-600">
-                        <li class="flex gap-2"><span class="text-indigo-600">✓</span> Gestionar clientes y proyectos con tareas y tarifas.</li>
-                        <li class="flex gap-2"><span class="text-indigo-600">✓</span> Cargar horas y generar facturas con PDF.</li>
-                        <li class="flex gap-2"><span class="text-indigo-600">✓</span> Dar de alta usuarios cliente y que registren pagos.</li>
+                        <li class="flex gap-2"><span class="text-indigo-600">✓</span> Estudio (organización) por cada cuenta freelancer.</li>
+                        <li class="flex gap-2"><span class="text-indigo-600">✓</span> Clientes, proyectos, horas y facturas con PDF.</li>
+                        <li class="flex gap-2"><span class="text-indigo-600">✓</span> Portal cliente, pagos y verificación de email.</li>
+                        <li class="flex gap-2"><span class="text-indigo-600">✓</span> Términos y privacidad publicados.</li>
                     </ul>
                 </div>
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-                    <h2 class="text-xl font-bold text-amber-950">Gratis ahora, evolución a futuro</h2>
-                    <p class="mt-3 text-sm leading-relaxed text-amber-950/90">
-                        Mientras desarrollás el producto, podés ofrecer el uso <strong>sin cargo</strong> para validar con usuarios reales. Más adelante podés sumar planes de pago (por ejemplo límites de facturas, usuarios o funciones avanzadas como impuestos legales o multi-equipo); eso implica pasarela de cobro y términos legales propios.
-                    </p>
-                    <p class="mt-4 text-xs text-amber-900/80">
-                        El botón “Deploy now” que traía Laravel era solo un enlace a servicios de despliegue del ecosistema Laravel, no un deploy automático a Fly.io ni a otros hosts. Para publicar la app seguí la guía de tu proveedor (build, variables de entorno, base de datos).
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+                    <h2 class="text-xl font-bold text-slate-900">Próximo paso comercial</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+                        Cuando quieras cobrar automáticamente, sumá Stripe o Lemon Squeezy y enlazá el upgrade Pro al pago. Hasta entonces, activás Pro desde el panel de administración.
                     </p>
                 </div>
             </div>
@@ -109,7 +145,12 @@
     </main>
 
     <footer class="border-t border-slate-200 bg-white py-8 text-center text-sm text-slate-500">
-        <p>{{ config('app.name', 'InvoiceFlow') }} · Hecho con Laravel</p>
+        <p class="mb-2">{{ config('app.name', 'InvoiceFlow') }} · Hecho con Laravel</p>
+        <p>
+            <a href="{{ route('legal.privacy') }}" class="text-indigo-600 hover:underline">Privacidad</a>
+            ·
+            <a href="{{ route('legal.terms') }}" class="text-indigo-600 hover:underline">Términos</a>
+        </p>
     </footer>
 </body>
 </html>

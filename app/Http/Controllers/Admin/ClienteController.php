@@ -6,12 +6,16 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Cliente;
 use App\Models\User;
+use App\Services\PlanUsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ClienteController extends Controller
 {
+    public function __construct(
+        protected PlanUsageService $planUsage
+    ) {}
     public function index(): View
     {
         $clientes = Cliente::query()
@@ -41,6 +45,13 @@ class ClienteController extends Controller
             'notas' => ['nullable', 'string'],
         ]);
 
+        $owner = User::query()->findOrFail($data['user_id']);
+        $org = $owner->organization;
+        if ($org && ! $this->planUsage->canCreateClient($org)) {
+            return back()->withInput()->with('error', 'Ese estudio alcanzó el límite de clientes del plan gratuito.');
+        }
+
+        $data['organization_id'] = $org?->id;
         Cliente::query()->create($data);
 
         return redirect()->route('admin.clientes.index')->with('ok', 'Cliente creado correctamente.');

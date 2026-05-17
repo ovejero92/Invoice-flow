@@ -8,4 +8,6 @@
     <a href="{{ route('freelancer.dashboard') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('freelancer.dashboard') }}">Mi panel</a>
     <a href="{{ route('freelancer.proyectos.index') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('freelancer.proyectos.*') }}">Mis proyectos</a>
     <a href="{{ route('freelancer.reporte-horas') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('freelancer.reporte-horas') }}">Reporte de horas</a>
+    <a href="{{ route('freelancer.organization.settings') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('freelancer.organization.*') }}">Datos fiscales</a>
+    <a href="{{ route('billing.index') }}" class="block rounded-md border-l-4 px-3 py-2 {{ $active('billing.*') }}">Mi plan</a>
 </nav>

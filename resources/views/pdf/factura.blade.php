@@ -19,8 +19,20 @@
     <table style="border:none; margin:0;">
         <tr style="border:none;">
             <td style="border:none; width:60%; vertical-align:top;">
+                @php $org = $factura->organization; @endphp
                 <h1>Factura {{ $factura->numero }}</h1>
-                <p class="muted">{{ config('app.name') }}</p>
+                @if ($org?->legal_name || $org?->name)
+                    <p><strong>{{ $org->legal_name ?: $org->name }}</strong></p>
+                @endif
+                @if ($org?->tax_id)
+                    <p class="muted">NIF/CIF: {{ $org->tax_id }}</p>
+                @endif
+                @if ($org?->legal_address)
+                    <p class="muted" style="white-space:pre-line;">{{ $org->legal_address }}</p>
+                @endif
+                @if (! $org)
+                    <p class="muted">{{ config('app.name') }}</p>
+                @endif
                 <p class="muted">Emitida: {{ $factura->fecha_emision->format('d/m/Y') }}</p>
             </td>
             <td style="border:none; vertical-align:top; text-align:right;">

@@ -2,4 +2,5 @@
     <a href="{{ route('freelancer.dashboard') }}" class="{{ request()->routeIs('freelancer.dashboard') ? 'text-teal-700 font-semibold' : '' }}">Panel</a>
     <a href="{{ route('freelancer.proyectos.index') }}" class="{{ request()->routeIs('freelancer.proyectos.*') ? 'text-teal-700 font-semibold' : '' }}">Proyectos</a>
     <a href="{{ route('freelancer.reporte-horas') }}" class="{{ request()->routeIs('freelancer.reporte-horas') ? 'text-teal-700 font-semibold' : '' }}">Reporte</a>
+    <a href="{{ route('billing.index') }}" class="{{ request()->routeIs('billing.*') ? 'text-teal-700 font-semibold' : '' }}">Plan</a>
 </div>

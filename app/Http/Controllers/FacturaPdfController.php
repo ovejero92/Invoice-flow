@@ -11,7 +11,7 @@ class FacturaPdfController extends Controller
     {
         $this->authorizeFactura($factura);
 
-        $factura->load(['cliente', 'user', 'registrosHoras.tarea.proyecto']);
+        $factura->load(['cliente', 'user', 'organization', 'registrosHoras.tarea.proyecto']);
 
         return Pdf::loadView('pdf.factura', ['factura' => $factura])
             ->download('factura-'.$factura->numero.'.pdf');

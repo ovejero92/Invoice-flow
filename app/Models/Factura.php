@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Factura extends Model
 {
     protected $fillable = [
+        'organization_id',
         'user_id',
         'cliente_id',
         'numero',
@@ -36,6 +37,11 @@ class Factura extends Model
             'total' => 'decimal:2',
             'estado' => FacturaEstado::class,
         ];
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
     }
 
     public function user(): BelongsTo

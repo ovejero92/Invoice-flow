@@ -11,7 +11,12 @@
 <x-panel-layout title="Facturación" subtitle="Historial y generación por periodo">
     <div class="flex flex-col sm:flex-row sm:justify-between gap-4 mb-6">
         <p class="text-sm text-slate-600">Las facturas toman horas registradas, facturables y sin asignar a otra factura.</p>
-        <a href="{{ route('admin.facturas.create') }}" class="inline-flex justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500">Generar factura</a>
+        <div class="flex flex-wrap gap-2">
+            @if (auth()->user()->isAdmin() || auth()->user()->organization?->isPro())
+                <a href="{{ route('admin.facturas.export') }}" class="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Exportar CSV</a>
+            @endif
+            <a href="{{ route('admin.facturas.create') }}" class="inline-flex justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500">Generar factura</a>
+        </div>
     </div>
 
     <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/60">

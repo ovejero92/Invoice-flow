@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Cliente extends Model
 {
     protected $fillable = [
+        'organization_id',
         'user_id',
         'nombre',
         'email',
@@ -16,6 +17,11 @@ class Cliente extends Model
         'direccion',
         'notas',
     ];
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
 
     public function user(): BelongsTo
     {

@@ -10,7 +10,10 @@ use Illuminate\Validation\Rules\Password;
 
 class InvoiceflowCreateAdmin extends Command
 {
-    protected $signature = 'invoiceflow:create-admin {email : Correo del administrador} {--name= : Nombre (solo usuarios nuevos)}';
+    protected $signature = 'invoiceflow:create-admin
+                            {email : Correo del administrador}
+                            {--name= : Nombre (solo usuarios nuevos)}
+                            {--reset-password : Pedir contraseña nueva aunque el usuario ya exista}';
 
     protected $description = 'Crea un administrador o asigna el rol admin a un usuario existente (uso en servidor; no expone registro público)';
 
@@ -30,30 +33,28 @@ class InvoiceflowCreateAdmin extends Command
             $user->update([
                 'role' => UserRole::Admin,
                 'cliente_id' => null,
+                'email_verified_at' => $user->email_verified_at ?? now(),
             ]);
 
             $this->info("El usuario {$email} ahora es administrador.");
 
-            if ($this->confirm('¿Querés definir una nueva contraseña ahora?', false)) {
-                $plain = (string) $this->secret('Nueva contraseña');
-                $validator = validator(['password' => $plain], ['password' => ['required', Password::defaults()]]);
-                if ($validator->fails()) {
-                    $this->error((string) $validator->errors()->first('password'));
+            $mustReset = $this->option('reset-password')
+                || $this->confirm('¿Definir una contraseña nueva para entrar en la web? (recomendado si no podés iniciar sesión)', true);
 
+            if ($mustReset) {
+                if (! $this->applyPassword($user)) {
                     return self::FAILURE;
                 }
-                $user->update(['password' => Hash::make($plain)]);
-                $this->info('Contraseña actualizada.');
+                $this->info('Contraseña actualizada. Usá ese email y la contraseña que acabás de escribir en /login');
+            } else {
+                $this->warn('No se cambió la contraseña: usá la que ya tenía ese email (p. ej. si se registró antes como freelancer).');
             }
 
             return self::SUCCESS;
         }
 
-        $plain = (string) $this->secret('Contraseña del nuevo administrador');
-        $validator = validator(['password' => $plain], ['password' => ['required', Password::defaults()]]);
-        if ($validator->fails()) {
-            $this->error((string) $validator->errors()->first('password'));
-
+        $plain = $this->askForNewPassword();
+        if ($plain === null) {
             return self::FAILURE;
         }
 
@@ -70,10 +71,45 @@ class InvoiceflowCreateAdmin extends Command
             'password' => Hash::make($plain),
             'role' => UserRole::Admin,
             'cliente_id' => null,
+            'email_verified_at' => now(),
         ]);
 
         $this->info("Administrador creado: {$email}");
+        $this->info('Entrá en la web con ese email y la contraseña que escribiste en /login');
 
         return self::SUCCESS;
+    }
+
+    private function askForNewPassword(): ?string
+    {
+        $plain = (string) $this->secret('Contraseña del administrador (mín. 8 caracteres)');
+        $confirm = (string) $this->secret('Repetir contraseña');
+
+        if ($plain !== $confirm) {
+            $this->error('Las contraseñas no coinciden.');
+
+            return null;
+        }
+
+        $validator = validator(['password' => $plain], ['password' => ['required', Password::defaults()]]);
+        if ($validator->fails()) {
+            $this->error((string) $validator->errors()->first('password'));
+
+            return null;
+        }
+
+        return $plain;
+    }
+
+    private function applyPassword(User $user): bool
+    {
+        $plain = $this->askForNewPassword();
+        if ($plain === null) {
+            return false;
+        }
+
+        $user->update(['password' => Hash::make($plain)]);
+
+        return true;
     }
 }

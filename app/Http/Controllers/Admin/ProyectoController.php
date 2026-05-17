@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cliente;
 use App\Models\Proyecto;
 use App\Models\User;
+use App\Services\PlanUsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,6 +16,10 @@ use Illuminate\View\View;
 
 class ProyectoController extends Controller
 {
+    public function __construct(
+        protected PlanUsageService $planUsage
+    ) {}
+
     public function index(): View
     {
         $proyectos = Proyecto::query()
@@ -37,6 +42,12 @@ class ProyectoController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
+        $owner = User::query()->findOrFail($data['user_id']);
+        $org = $owner->organization;
+        if ($org && ! $this->planUsage->canCreateProject($org)) {
+            return back()->withInput()->with('error', 'Ese estudio alcanzó el límite de proyectos del plan gratuito.');
+        }
+        $data['organization_id'] = $org?->id;
         Proyecto::query()->create($data);
 
         return redirect()->route('admin.proyectos.index')->with('ok', 'Proyecto creado.');

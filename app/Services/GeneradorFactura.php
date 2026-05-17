@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\FacturaEstado;
 use App\Models\Factura;
+use App\Models\Organization;
 use App\Models\Proyecto;
 use App\Models\RegistroHoras;
 use Illuminate\Support\Carbon;
@@ -12,20 +13,27 @@ use InvalidArgumentException;
 
 class GeneradorFactura
 {
+    public function __construct(
+        protected PlanUsageService $planUsage
+    ) {}
+
     /**
-     * Genera una factura emitida y asocia los registros de horas libres del periodo.
-     *
      * @return array{factura: Factura, registros_asignados: int}
      */
     public function generar(
         Proyecto $proyecto,
         Carbon $desde,
         Carbon $hasta,
-        float $impuestoPct,
+        ?float $impuestoPct = null,
         ?string $notas = null
     ): array {
         if ($desde->greaterThan($hasta)) {
             throw new InvalidArgumentException('La fecha desde debe ser anterior o igual a la fecha hasta.');
+        }
+
+        $organization = $proyecto->organization ?? $proyecto->user?->organization;
+        if ($organization && ! $this->planUsage->canCreateInvoice($organization)) {
+            throw new InvalidArgumentException('Límite de facturas del plan gratuito alcanzado este mes. Pasá a Pro para continuar.');
         }
 
         $ids = RegistroHoras::query()
@@ -44,13 +52,16 @@ class GeneradorFactura
             $registros->sum(fn (RegistroHoras $r) => (float) $r->horas * $tarifa),
             2
         );
-        $impuestoImporte = round($subtotal * ($impuestoPct / 100), 2);
+
+        $taxPct = $impuestoPct ?? (float) ($organization?->default_tax_rate ?? 21);
+        $impuestoImporte = round($subtotal * ($taxPct / 100), 2);
         $total = round($subtotal + $impuestoImporte, 2);
 
-        return DB::transaction(function () use ($proyecto, $desde, $hasta, $subtotal, $impuestoPct, $impuestoImporte, $total, $notas, $registros) {
-            $numero = $this->siguienteNumero($proyecto->user_id);
+        return DB::transaction(function () use ($proyecto, $organization, $desde, $hasta, $subtotal, $taxPct, $impuestoImporte, $total, $notas, $registros) {
+            $numero = $this->siguienteNumero($organization, $proyecto->user_id);
 
             $factura = Factura::query()->create([
+                'organization_id' => $organization?->id ?? $proyecto->organization_id,
                 'user_id' => $proyecto->user_id,
                 'cliente_id' => $proyecto->cliente_id,
                 'numero' => $numero,
@@ -58,7 +69,7 @@ class GeneradorFactura
                 'periodo_desde' => $desde->toDateString(),
                 'periodo_hasta' => $hasta->toDateString(),
                 'subtotal' => $subtotal,
-                'impuesto_pct' => $impuestoPct,
+                'impuesto_pct' => $taxPct,
                 'impuesto_importe' => $impuestoImporte,
                 'total' => $total,
                 'estado' => FacturaEstado::Emitida,
@@ -67,23 +78,26 @@ class GeneradorFactura
 
             RegistroHoras::query()->whereIn('id', $registros->pluck('id'))->update(['factura_id' => $factura->id]);
 
-            return ['factura' => $factura->fresh(['cliente', 'registrosHoras.tarea']), 'registros_asignados' => $registros->count()];
+            return ['factura' => $factura->fresh(['cliente', 'registrosHoras.tarea', 'organization']), 'registros_asignados' => $registros->count()];
         });
     }
 
-    protected function siguienteNumero(int $userId): string
+    protected function siguienteNumero(?Organization $organization, int $userId): string
     {
         $year = now()->format('Y');
-        $prefix = $year.'-';
+        $series = $organization?->invoice_series_prefix ? trim($organization->invoice_series_prefix).'-'.$year.'-' : $year.'-';
 
-        $last = Factura::query()
-            ->where('user_id', $userId)
-            ->where('numero', 'like', $prefix.'%')
-            ->orderByDesc('numero')
-            ->value('numero');
+        $query = Factura::query()->where('numero', 'like', $series.'%');
 
-        $next = $last ? ((int) substr($last, strlen($prefix))) + 1 : 1;
+        if ($organization) {
+            $query->where('organization_id', $organization->id);
+        } else {
+            $query->where('user_id', $userId);
+        }
 
-        return $prefix.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
+        $last = $query->orderByDesc('numero')->value('numero');
+        $next = $last ? ((int) substr($last, strlen($series))) + 1 : 1;
+
+        return $series.str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 }
