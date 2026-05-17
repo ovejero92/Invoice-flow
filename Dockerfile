@@ -56,12 +56,14 @@ RUN chmod 754 /usr/local/bin/start-nginx
 COPY . /var/www/html
 WORKDIR /var/www/html
 
-# 4. Setup application dependencies (.env de build; APP_KEY real va por secrets en Fly)
+# 4. Setup application dependencies (.env solo para build; APP_KEY y DATABASE_URL vienen de Fly secrets en runtime)
 RUN cp .env.example .env \
     && php -r '$k="base64:".base64_encode(random_bytes(32)); $e=file_get_contents(".env"); file_put_contents(".env", preg_replace("/^APP_KEY=.*/m", "APP_KEY=".$k, $e));' \
+    && sed -i 's/^CACHE_STORE=.*/CACHE_STORE=file/' .env \
+    && sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=cookie/' .env \
+    && sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=pgsql/' .env \
     && composer install --optimize-autoloader --no-dev \
-    && mkdir -p storage/logs \
-    && php artisan optimize:clear \
+    && mkdir -p storage/logs storage/framework/cache/data storage/framework/sessions storage/framework/views bootstrap/cache \
     && chown -R www-data:www-data /var/www/html \
     && printf '%s\n' 'MAILTO=""' '* * * * * www-data /usr/bin/php /var/www/html/artisan schedule:run' > /etc/cron.d/laravel \
     && if [ -d .fly ]; then cp .fly/entrypoint.sh /entrypoint; chmod +x /entrypoint; fi;

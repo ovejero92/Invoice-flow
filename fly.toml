@@ -2,7 +2,7 @@
 # Cambiá `app` por el nombre que elijas, o ejecutá `fly launch` y dejá que Fly lo cree.
 
 app = 'projinvoiceflow'
-primary_region = 'mad'
+primary_region = 'gru'
 
 [build]
   [build.args]

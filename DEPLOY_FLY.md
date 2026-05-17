@@ -4,7 +4,7 @@
 
 1. Instalá **Flyctl** (CLI): [Instalación de flyctl](https://fly.io/docs/flyctl/install/) (Windows: `powershell -Command "iwr https://fly.io/install.ps1 -useb | iex"` o el instalador que indique la doc).
 2. Iniciá sesión: `fly auth signup` o `fly auth login`.
-3. **Docker Desktop** (u otro Docker) suele hacer falta en local para que `fly deploy` construya la imagen en tu máquina.
+3. **Docker local no es obligatorio**: `fly deploy` suele construir en la nube (**Depot**). Solo hace falta `flyctl` e internet.
 
 ## 2. Código listo en GitHub
 
